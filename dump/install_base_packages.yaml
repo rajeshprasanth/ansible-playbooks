@@ -1,0 +1,11 @@
+---
+- name: Install essential packages on Fedora
+  hosts: all
+  become: True
+
+  tasks:
+    - name: Update package repository
+      command: dnf makecache
+
+    - name: Install base packages htop, mailx, and git
+      command: dnf install -y htop mailx git

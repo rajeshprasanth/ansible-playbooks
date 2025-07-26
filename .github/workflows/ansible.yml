@@ -1,0 +1,57 @@
+name: Ansible CI
+
+on:
+  push:
+    paths:
+      - '**.yml'
+      - '**.yaml'
+  pull_request:
+
+jobs:
+  ansible-checks:
+    runs-on: ubuntu-latest  # GitHub Actions only supports a limited set of runners
+
+    container:
+      image: registry.fedoraproject.org/fedora:latest
+
+    env:
+      ANSIBLE_HOST_KEY_CHECKING: "False"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Python3 and pip
+        run: |
+          dnf install -y python3 python3-pip
+          python3 -m pip install --upgrade pip
+
+      - name: Install Ansible and ansible-lint
+        run: |
+          pip3 install ansible ansible-lint
+
+      - name: Create Test Inventory
+        run: |
+          mkdir -p inventories
+          echo "[local]" > inventories/test
+          echo "localhost ansible_connection=local" >> inventories/test
+
+      - name: Run ansible-lint on playbooks
+        run: ansible-lint playbooks/**/*.yml
+
+      - name: Run ansible-lint on roles
+        run: ansible-lint roles/config_motd/tasks/*.yml
+
+      - name: Ansible Syntax Check
+        run: |
+          for pb in playbooks/**/*.yml; do
+            echo "Checking syntax for $pb"
+            ansible-playbook -i inventories/test "$pb" --syntax-check
+          done
+
+      - name: Ansible Dry Run (--check)
+        run: |
+          for pb in playbooks/**/*.yml; do
+            echo "Dry-running $pb"
+            ansible-playbook -i inventories/test "$pb" --check --diff
+          done

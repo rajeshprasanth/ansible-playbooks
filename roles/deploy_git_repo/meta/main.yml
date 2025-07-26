@@ -1,9 +1,9 @@
-# roles/config_motd/meta/main.yml
+# roles/deploy_git_repo/meta/main.yml
 ---
 galaxy_info:
-  role_name: config_motd
+  role_name: deploy_git_repo
   author: Rajesh Prashanth Anandavadivel
-  description: Configure MOTD and login information for system access
+  description: Clone and deploy a Git repository to a specified directory.
   license: GPL-3.0-or-later
   min_ansible_version: "2.9"
   platforms:

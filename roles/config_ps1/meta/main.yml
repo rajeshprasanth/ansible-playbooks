@@ -1,9 +1,9 @@
-# roles/config_motd/meta/main.yml
+# roles/config_ps1/meta/main.yml
 ---
 galaxy_info:
-  role_name: config_motd
+  role_name: config_ps1
   author: Rajesh Prashanth Anandavadivel
-  description: Configure MOTD and login information for system access
+  description: Configure a custom PS1 shell prompt for all users via /etc/profile.d.
   license: GPL-3.0-or-later
   min_ansible_version: "2.9"
   platforms:

@@ -9,7 +9,7 @@ on:
 
 jobs:
   ansible-checks:
-    runs-on: ubuntu-latest  # GitHub Actions only supports a limited set of runners
+    runs-on: ubuntu-latest
 
     container:
       image: registry.fedoraproject.org/fedora:latest
@@ -44,14 +44,32 @@ jobs:
 
       - name: Ansible Syntax Check
         run: |
+          set -e
+          failed=0
           for pb in playbooks/**/*.yml; do
             echo "Checking syntax for $pb"
-            ansible-playbook -i inventories/test "$pb" --syntax-check
+            if ! ansible-playbook -i inventories/test "$pb" --syntax-check; then
+              echo "Syntax check FAILED for $pb"
+              failed=1
+            fi
           done
+          if [ $failed -ne 0 ]; then
+            echo "One or more playbooks failed syntax check"
+            exit 1
+          fi
 
       - name: Ansible Dry Run (--check)
         run: |
+          set -e
+          failed=0
           for pb in playbooks/**/*.yml; do
             echo "Dry-running $pb"
-            ansible-playbook -i inventories/test "$pb" --check --diff
+            if ! ansible-playbook -i inventories/test "$pb" --check --diff; then
+              echo "Dry run FAILED for $pb"
+              failed=1
+            fi
           done
+          if [ $failed -ne 0 ]; then
+            echo "One or more playbooks failed dry run"
+            exit 1
+          fi

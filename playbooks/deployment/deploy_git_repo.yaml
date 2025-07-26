@@ -1,0 +1,25 @@
+---
+- name: Clone Git Repository
+  hosts: all
+  become: yes
+  vars:
+    repo_url: "https://github.com/your-username/your-repo.git"
+    dest_path: "/path/to/your/directory"
+  tasks:
+    - name: Ensure git is installed
+      package:
+        name: git
+        state: present
+
+    - name: Ensure destination directory exists
+      file:
+        path: "{{ dest_path }}"
+        state: directory
+        mode: '0755'
+
+    - name: Clone the repository
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ dest_path }}"
+        version: main  # Change branch if needed
+        update: yes

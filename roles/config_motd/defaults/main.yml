@@ -1,0 +1,3 @@
+cockpit_motd_path: /etc/motd.d/cockpit
+cockpit_profile_dest: /etc/profile.d/login_info.sh
+cockpit_profile_src: login_info.sh

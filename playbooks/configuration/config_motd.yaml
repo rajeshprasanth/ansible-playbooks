@@ -1,0 +1,6 @@
+---
+- name: Apply MOTD and login message configuration
+  hosts: "{{ target | default('all') }}"
+  become: true
+  roles:
+    - config_motd

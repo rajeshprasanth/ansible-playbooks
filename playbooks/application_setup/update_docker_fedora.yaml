@@ -1,0 +1,73 @@
+---
+- name: Update Docker on Fedora
+  hosts: all
+  become: true
+  vars:
+    docker_repo_url: https://download.docker.com/linux/fedora/docker-ce.repo
+    docker_gpg_key: https://download.docker.com/linux/fedora/gpg
+
+  tasks:
+    - name: Ensure dnf-plugins-core is installed
+      ansible.builtin.dnf:
+        name: dnf-plugins-core
+        state: present
+      tags: install
+
+    - name: Add Docker repository (if not already added)
+      ansible.builtin.command: |
+        /usr/bin/dnf-3 config-manager --add-repo {{ docker_repo_url }}
+      args:
+        creates: /etc/yum.repos.d/docker-ce.repo
+      tags: repo
+
+    - name: Import Docker GPG key
+      ansible.builtin.rpm_key:
+        key: "{{ docker_gpg_key }}"
+      tags: repo
+
+    - name: Update Docker and related packages
+      ansible.builtin.dnf:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present  # Avoid using 'latest'
+        update_cache: true
+      register: docker_updated
+      tags: update
+
+    - name: Ensure Docker service is running
+      ansible.builtin.service:
+        name: docker
+        state: started
+      tags: service
+
+    - name: Display Docker version
+      ansible.builtin.command: docker --version
+      register: docker_version
+      changed_when: false  # This task does not change the system
+      tags: validate
+
+    - name: Print Docker version
+      ansible.builtin.debug:
+        var: docker_version.stdout
+      tags: validate
+
+    - name: Validate Docker installation
+      ansible.builtin.command: docker run hello-world
+      register: docker_validation
+      changed_when: false  # This task does not change the system
+      tags: validate
+
+    - name: Print Docker validation result
+      ansible.builtin.debug:
+        var: docker_validation.stdout
+      tags: validate
+
+  handlers:
+    - name: Restart Docker service
+      ansible.builtin.service:
+        name: docker
+        state: restarted

@@ -1,3 +1,5 @@
+image: registry.fedoraproject.org/fedora:latest
+
 stages:
   - lint
   - syntax-check
@@ -5,38 +7,34 @@ stages:
 
 variables:
   ANSIBLE_HOST_KEY_CHECKING: "False"
-  PATH: "$HOME/.local/bin:$PATH"
 
 before_script:
-  - sudo dnf install -y python3-pip
-  - pip3 install --user ansible ansible-lint
+  - dnf install -y python3-pip git
+  - pip3 install ansible ansible-lint
+  - mkdir -p inventories
+  - echo "[local]" > inventories/test
+  - echo "localhost ansible_connection=local" >> inventories/test
 
-# 🔍 Lint all playbooks and roles
 lint:
   stage: lint
   script:
-    - echo "[local]" > inventories/test
-    - echo "localhost ansible_connection=local" >> inventories/test
     - ansible-lint playbooks/**/*.yml
     - ansible-lint roles/config_motd/tasks/*.yml
 
-# ✅ Syntax check all playbooks
 syntax-check:
   stage: syntax-check
   script:
-    - echo "[local]" > inventories/test
-    - echo "localhost ansible_connection=local" >> inventories/test
-    - for pb in playbooks/**/*.yml; do
-        ansible-playbook -i inventories/test "$pb" --syntax-check;
+    - |
+      for pb in playbooks/**/*.yml; do
+        echo "🔍 Checking syntax for $pb"
+        ansible-playbook -i inventories/test "$pb" --syntax-check
       done
 
-# 🧪 Dry-run all playbooks (simulate changes)
 dry-run:
   stage: dry-run
   script:
-    - echo "[local]" > inventories/test
-    - echo "localhost ansible_connection=local" >> inventories/test
-    - for pb in playbooks/**/*.yml; do
-        echo "Testing $pb";
-        ansible-playbook -i inventories/test "$pb" --check --diff;
+    - |
+      for pb in playbooks/**/*.yml; do
+        echo "🧪 Dry-run: $pb"
+        ansible-playbook -i inventories/test "$pb" --check --diff
       done

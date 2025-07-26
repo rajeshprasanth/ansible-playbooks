@@ -1,0 +1,24 @@
+---
+- name: Install Zabbix agent and execute script on remote server
+  hosts: all
+  become: yes  # Elevated privileges required
+  tasks:
+
+    - name: Copy zabbix_agent.sh script to remote server
+      copy:
+        src: ./zabbix_agent.sh  # Local path of the script
+        dest: /tmp/zabbix_agent.sh  # Remote destination
+        mode: '0755'  # Make script executable
+
+    - name: Execute the copied zabbix_agent.sh script on the remote server
+      command: /tmp/zabbix_agent.sh
+
+    - name: Restart the Zabbix agent service
+      systemd:
+        name: zabbix-agent
+        state: restarted
+
+    - name: Enable the Zabbix agent service to start on boot
+      systemd:
+        name: zabbix-agent
+        enabled: yes

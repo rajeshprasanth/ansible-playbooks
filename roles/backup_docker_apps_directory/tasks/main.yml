@@ -1,0 +1,13 @@
+# roles/backup_docker_apps_directory/tasks/main.yml
+---
+- name: Ensure backup directory exists
+  file:
+    path: "{{ backup_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Archive entire source directory
+  archive:
+    path: "{{ src_dir }}"
+    dest: "{{ backup_dir }}/apps_{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}.tar.gz"
+    format: gz

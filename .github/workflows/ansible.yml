@@ -40,7 +40,7 @@ jobs:
         run: ansible-lint playbooks/**/*.yml
 
       - name: Run ansible-lint on roles
-        run: ansible-lint roles/config_motd/tasks/*.yml
+        run: ansible-lint roles/**/*.yml
 
       - name: Ansible Syntax Check
         run: |

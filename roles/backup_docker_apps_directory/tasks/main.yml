@@ -1,13 +1,22 @@
 # roles/backup_docker_apps_directory/tasks/main.yml
 ---
 - name: Ensure backup directory exists
-  file:
-    path: "{{ backup_dir }}"
+  ansible.builtin.file:
+    path: "{{ backup_docker_apps_directory_backup_dir }}"
     state: directory
     mode: '0755'
 
-- name: Archive entire source directory
-  archive:
-    path: "{{ src_dir }}"
-    dest: "{{ backup_dir }}/apps_{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}.tar.gz"
+- name: Set timestamp for backup
+  ansible.builtin.set_fact:
+    backup_docker_apps_directory_timestamp: "{{ lookup('ansible.builtin.pipe', 'date +%Y%m%d_%H%M%S') }}"
+
+- name: Construct backup filename
+  ansible.builtin.set_fact:
+    backup_docker_apps_directory_backup_filename: "docker_apps_backup_{{ backup_docker_apps_directory_timestamp }}.tar.gz"
+
+- name: Create backup archive
+  community.general.archive:
+    path: "{{ backup_docker_apps_directory_src_dir }}"
+    dest: "{{ backup_docker_apps_directory_backup_dir }}/{{ backup_docker_apps_directory_backup_filename }}"
     format: gz
+    mode: '0644'

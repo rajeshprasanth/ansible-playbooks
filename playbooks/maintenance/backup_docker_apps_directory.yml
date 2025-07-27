@@ -1,7 +1,6 @@
-# playbooks/backup_docker_apps.yml
 ---
-- name: Backup Docker apps directory
-  hosts: "{{ target | default('localhost') }}"
+- name: Run backup role
+  hosts: localhost
   become: true
 
   vars:
@@ -11,5 +10,5 @@
   roles:
     - role: backup_docker_apps_directory
       vars:
-        src_dir: "{{ src_dir }}"
-        backup_dir: "{{ backup_dir }}"
+        backup_docker_apps_directory_src_dir: "{{ src_dir }}"
+        backup_docker_apps_directory_backup_dir: "{{ backup_dir }}"

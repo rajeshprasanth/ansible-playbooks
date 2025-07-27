@@ -1,6 +1,0 @@
----
-- name: Apply custom PS1 prompt configuration
-  hosts: "{{ target | default('all') }}"
-  become: true
-  roles:
-    - config_ps1

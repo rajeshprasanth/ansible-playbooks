@@ -1,6 +1,0 @@
----
-- name: Set timezone on hosts
-  hosts: "{{ target | default('all') }}"
-  become: true
-  roles:
-    - set_timezone

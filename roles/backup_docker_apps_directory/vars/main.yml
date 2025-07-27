@@ -1,7 +1,1 @@
 # roles/backup_docker_apps_directory/vars/main.yml
----
-src_dir: /home/srcadm/apps
-backup_dir: /opt/homelab/backup
-timestamp: "{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}"
-backup_filename: "apps_{{ timestamp }}.tar.gz"
-backup_path: "{{ backup_dir }}/{{ backup_filename }}"

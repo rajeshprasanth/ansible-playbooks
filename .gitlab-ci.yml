@@ -1,0 +1,25 @@
+stages:
+  - lint
+
+variables:
+  ANSIBLE_CONFIG: "./ansible.cfg"
+
+lint_ansible:
+  image: python:3.11
+  stage: lint
+  before_script:
+    - pip install --upgrade pip
+    - pip install ansible ansible-lint
+  script:
+    # Run ansible-lint recursively on all playbooks
+    - ansible-lint playbooks/**/*.yml
+
+    # Run ansible syntax check on all playbooks
+    - |
+      for playbook in $(find playbooks -name '*.yml'); do
+        echo "Checking syntax for $playbook"
+        ansible-playbook --syntax-check "$playbook"
+      done
+  only:
+    - branches
+    - merge_requests

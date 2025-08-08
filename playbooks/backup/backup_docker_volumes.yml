@@ -1,0 +1,35 @@
+---
+- name: Backup Docker Volumes
+  hosts: "{{ target | default('all') }}"
+  become: true
+  gather_facts: false
+
+  vars:
+    backup_base_dir: /opt/homelab/backup/docker-volumes
+    timestamp: "{{ lookup('ansible.builtin.pipe', 'date +%Y%m%d_%H%M%S') }}"
+    backup_dir: "{{ backup_base_dir }}/{{ timestamp }}"
+
+  tasks:
+    - name: Create backup directory with timestamp
+      ansible.builtin.file:
+        path: "{{ backup_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Get list of Docker volumes
+      ansible.builtin.command:
+        cmd: docker volume ls --format '{{ "{{ .Name }}" }}'
+      register: docker_volumes
+      changed_when: false
+
+    - name: Backup each Docker volume
+      ansible.builtin.shell: |
+        docker run --rm \
+          -v {{ item }}:/volume \
+          -v {{ backup_dir }}:/backup \
+          alpine \
+          sh -c "cd /volume && tar czf /backup/backup_{{ item }}.tar.gz ."
+      loop: "{{ docker_volumes.stdout_lines }}"
+      loop_control:
+        label: "{{ item }}"
+      changed_when: true  # Always mark as changed because we made a backup

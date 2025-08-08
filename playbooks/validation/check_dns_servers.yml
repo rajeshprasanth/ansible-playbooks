@@ -1,0 +1,27 @@
+---
+- name: Ping remote DNS servers
+  hosts: all
+  gather_facts: false
+  become: false
+
+  vars:
+    dns_servers:
+      - 8.8.8.8
+      - 1.1.1.1
+      - 9.9.9.9
+
+  tasks:
+    - name: Ping DNS servers
+      ansible.builtin.command:
+        cmd: ping -c 3 {{ item }}
+      register: ping_results
+      failed_when: ping_results.rc != 0
+      changed_when: false
+      loop: "{{ dns_servers }}"
+
+    - name: Display ping results
+      ansible.builtin.debug:
+        msg: |
+          Ping to {{ item.item }}:
+          {{ item.stdout }}
+      loop: "{{ ping_results.results }}"

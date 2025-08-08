@@ -1,0 +1,19 @@
+---
+- name: Check System Uptime
+  hosts: "{{ target | default('all') }}"
+  gather_facts: true
+
+  tasks:
+    - name: Display system uptime in seconds
+      ansible.builtin.debug:
+        msg: "System uptime (seconds): {{ ansible_facts.uptime_seconds }}"
+
+    - name: Display formatted uptime
+      ansible.builtin.command:
+        cmd: uptime -p
+      register: uptime_pretty
+      changed_when: false
+
+    - name: Show formatted uptime
+      ansible.builtin.debug:
+        msg: "{{ uptime_pretty.stdout }}"

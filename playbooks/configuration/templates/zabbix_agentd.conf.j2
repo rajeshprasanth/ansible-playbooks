@@ -1,0 +1,9 @@
+PidFile=/run/zabbix/zabbix_agentd.pid
+LogFile=/var/log/zabbix/zabbix_agentd.log
+LogFileSize=0
+Server={{ zabbix_server_name }}
+ListenPort=10050
+ListenIP=0.0.0.0
+ServerActive={{ zabbix_server_name }}
+Hostname={{ zabbix_agent_name }}
+Include=/etc/zabbix/zabbix_agentd.d/*.conf

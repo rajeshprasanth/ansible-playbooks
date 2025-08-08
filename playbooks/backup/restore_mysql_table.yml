@@ -1,0 +1,32 @@
+---
+- name: Restore MySQL Table
+  hosts: "{{ target | default('all') }}"
+  become: true
+  gather_facts: false
+
+  vars:
+    mysql_user: root
+    mysql_password: your_mysql_password
+    mysql_host: localhost
+    mysql_database: your_database_name
+    mysql_table: your_table_name
+    backup_file: /opt/homelab/backup/mysql/mysql_backup_{{ mysql_database }}_{{ mysql_table }}_restore.sql
+
+  tasks:
+    - name: Check if backup SQL file exists
+      ansible.builtin.stat:
+        path: "{{ backup_file }}"
+      register: backup_file_stat
+
+    - name: Fail if backup file does not exist
+      ansible.builtin.fail:
+        msg: "Backup SQL file {{ backup_file }} does not exist!"
+      when: not backup_file_stat.stat.exists
+
+    - name: Restore MySQL table from backup
+      ansible.builtin.command:
+        cmd: >
+          mysql -u{{ mysql_user }} -p'{{ mysql_password }}' -h {{ mysql_host }} {{ mysql_database }}
+          < {{ backup_file }}
+      no_log: true
+      changed_when: true

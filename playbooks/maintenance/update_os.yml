@@ -1,0 +1,48 @@
+---
+- name: Update OS with pre-update package snapshot
+  hosts: "{{ target | default('all') }}"
+  become: true
+  gather_facts: true
+
+  vars:
+    package_snapshot_dir: /opt/homelab/os-update
+
+  tasks:
+    - name: Ensure package snapshot directory exists
+      ansible.builtin.file:
+        path: "{{ package_snapshot_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Generate timestamp for snapshot filename
+      ansible.builtin.set_fact:
+        snapshot_timestamp: "{{ lookup('ansible.builtin.pipe', 'date +%Y%m%d_%H%M%S') }}"
+
+    - name: Gather installed package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Create list of installed packages
+      ansible.builtin.set_fact:
+        installed_packages_list: "{{ ansible_facts.packages.keys() | sort }}"
+
+    - name: Save installed packages list to file
+      ansible.builtin.copy:
+        content: |
+          {% for pkg in installed_packages_list %}
+          {{ pkg }}
+          {% endfor %}
+        dest: "{{ package_snapshot_dir }}/installed_packages_{{ snapshot_timestamp }}.dat"
+        mode: '0644'
+
+    - name: Update all packages with dnf upgrade -y
+      ansible.builtin.command:
+        cmd: dnf upgrade -y
+      register: dnf_upgrade_result
+      changed_when: "'Complete!' in dnf_upgrade_result.stdout"
+
+    - name: Reboot if kernel updated (optional)
+      ansible.builtin.reboot:
+        reboot_timeout: 600
+        test_command: uptime
+      when: "'kernel' in installed_packages_list"

@@ -1,0 +1,47 @@
+---
+- name: Configure Zabbix Agent
+  hosts: "{{ target | default('all') }}"
+  become: true
+
+  vars:
+    zabbix_agent_config_path: /etc/zabbix/zabbix_agentd.conf
+    zabbix_agent_backup_path: /etc/zabbix/zabbix_agentd.conf.bak
+    zabbix_agent_service: zabbix-agent
+    zabbix_server_name: monitoring.example.com
+    zabbix_agent_name: "{{ inventory_hostname }}"
+
+  tasks:
+
+    - name: Collect installed package facts
+      ansible.builtin.package_facts:
+
+    - name: Fail if Zabbix agent is not installed
+      ansible.builtin.fail:
+        msg: "Zabbix agent is not installed on this host."
+      when: "'zabbix-agent' not in ansible_facts.packages"
+
+    - name: Backup current Zabbix config
+      ansible.builtin.copy:
+        src: "{{ zabbix_agent_config_path }}"
+        dest: "{{ zabbix_agent_backup_path }}"
+        remote_src: true
+        backup: true
+        mode: '0644'
+
+    - name: Stop Zabbix Agent
+      ansible.builtin.service:
+        name: "{{ zabbix_agent_service }}"
+        state: stopped
+
+    - name: Deploy updated zabbix_agentd.conf
+      ansible.builtin.template:
+        src: "templates/zabbix_agentd.conf.j2"
+        dest: "{{ zabbix_agent_config_path }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Start Zabbix Agent
+      ansible.builtin.service:
+        name: "{{ zabbix_agent_service }}"
+        state: started

@@ -1,0 +1,17 @@
+---
+- name: Cleanup unused Docker images
+  hosts: "{{ target | default('all') }}"
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Remove dangling Docker images
+      ansible.builtin.command:
+        cmd: docker image prune -f
+      changed_when: true
+
+    - name: Remove all unused Docker images (optional)
+      ansible.builtin.command:
+        cmd: docker image prune -a -f
+      changed_when: true
+      # Uncomment the above task and comment the dangling images prune if you want to remove all unused images, not just dangling ones

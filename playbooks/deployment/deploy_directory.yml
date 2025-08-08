@@ -1,0 +1,19 @@
+---
+- name: Deploy local directory to remote directory
+  hosts: "{{ target | default('all') }}"
+  become: true
+
+  vars:
+    local_dir: "./local_directory"       # path to your local directory relative to playbook
+    remote_dir: "/opt/remote_directory"  # target remote directory
+
+  tasks:
+    - name: Copy local directory to remote
+      ansible.builtin.copy:
+        src: "{{ local_dir }}/"
+        dest: "{{ remote_dir }}/"
+        owner: root
+        group: root
+        mode: '0755'
+        directory_mode: '0755'
+        recurse: true

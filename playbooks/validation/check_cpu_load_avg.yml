@@ -1,0 +1,9 @@
+---
+- name: Check CPU Load Average
+  hosts: "{{ target | default('all') }}"
+  gather_facts: true
+
+  tasks:
+    - name: Display 1, 5, 15 minute load averages
+      ansible.builtin.debug:
+        msg: "Load averages (1m, 5m, 15m): {{ ansible_facts.loadavg }}"

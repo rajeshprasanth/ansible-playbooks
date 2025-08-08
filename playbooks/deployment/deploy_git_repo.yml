@@ -1,0 +1,18 @@
+---
+- name: Deploy remote git repository
+  hosts: "{{ target | default('all') }}"
+  become: true
+
+  vars:
+    repo_url: "https://github.com/user/repo.git"    # Git repository URL
+    dest_path: "/opt/myrepo"                         # Path on remote host where repo will be cloned/updated
+    repo_version: "main"                             # branch, tag, or commit to checkout
+
+  tasks:
+    - name: Clone or update git repository
+      ansible.builtin.git:
+        repo: "{{ repo_url }}"
+        dest: "{{ dest_path }}"
+        version: "{{ repo_version }}"
+        force: true            # force checkout even if repo exists
+        accept_hostkey: true

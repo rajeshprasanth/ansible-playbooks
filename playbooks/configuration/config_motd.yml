@@ -1,0 +1,26 @@
+---
+- name: Manage cockpit files and deploy login_info script
+  hosts: "{{ target | default('all') }}"
+  become: true
+  gather_facts: false
+
+  vars:
+    cockpit_motd_path: /etc/motd.d/cockpit
+    cockpit_profile_dest: /etc/profile.d/login_info.sh
+    cockpit_profile_src: files/login_info.sh
+
+  tasks:
+    - name: Remove cockpit motd directory if it exists
+      ansible.builtin.file:
+        path: "{{ cockpit_motd_path }}"
+        state: absent
+      tags:
+        - cleanup
+
+    - name: Copy login_info.sh to /etc/profile.d/ with executable permissions
+      ansible.builtin.copy:
+        src: "{{ cockpit_profile_src }}"
+        dest: "{{ cockpit_profile_dest }}"
+        mode: '0755'
+      tags:
+        - deploy

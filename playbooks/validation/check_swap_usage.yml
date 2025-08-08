@@ -1,0 +1,11 @@
+---
+- name: Check Swap Usage
+  hosts: "{{ target | default('all') }}"
+  gather_facts: true
+
+  tasks:
+    - name: Display swap total and free memory
+      ansible.builtin.debug:
+        msg: |
+          Total Swap: {{ ansible_facts.swaptotal_mb }} MB
+          Free Swap: {{ ansible_facts.swapfree_mb }} MB

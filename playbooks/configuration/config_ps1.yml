@@ -1,0 +1,21 @@
+---
+- name: Set Custom PS1 Prompt for All Users
+  hosts: "{{ target | default('all') }}"
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Create /etc/profile.d/custom_prompt.sh with PS1 export
+      ansible.builtin.copy:
+        dest: /etc/profile.d/custom_prompt.sh
+        content: |
+          #!/bin/bash
+          export PS1='\[\e[1;34m\]┌──(\[\e[0;36m\]\u\[\e[m\]@\[\e[0;33m\]\h\[\e[m\])-[\[\e[1;31m\]\[\e[0;31m\]\w\[\e[m\]]\n\[\e[1;34m\]└─\$ \[\e[m\]'
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Ensure /etc/profile.d/custom_prompt.sh is executable
+      ansible.builtin.file:
+        path: /etc/profile.d/custom_prompt.sh
+        mode: '0755'

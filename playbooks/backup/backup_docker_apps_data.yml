@@ -1,0 +1,24 @@
+---
+- name: Backup Docker Apps Directory
+  hosts: "{{ target | default('all') }}"
+  become: true
+  gather_facts: false
+
+  vars:
+    src_dir: /home/srcadm/apps
+    backup_dir: /opt/homelab/backup/docker-data
+
+  tasks:
+    - name: Ensure backup directory exists
+      ansible.builtin.file:
+        path: "{{ backup_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Create timestamped backup
+      community.general.archive:
+        path: "{{ src_dir }}"
+        dest: >-
+          {{ backup_dir }}/apps_{{ ansible_date_time.date | regex_replace('-', '') }}_{{ ansible_date_time.time | regex_replace(':', '') }}.tar.gz
+        format: gz
+        mode: "0644"

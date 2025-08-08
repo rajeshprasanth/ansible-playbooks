@@ -1,0 +1,28 @@
+---
+- name: Update Docker packages on Fedora
+  hosts: "{{ target | default('all') }}"
+  become: true
+  gather_facts: false
+
+  tasks:
+
+    - name: Update Docker packages
+      ansible.builtin.dnf:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: true
+      register: docker_update
+      notify: Restart Docker
+
+  handlers:
+
+    - name: Restart Docker
+      ansible.builtin.systemd:
+        name: docker
+        state: restarted
+        enabled: true

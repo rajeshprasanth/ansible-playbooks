@@ -1,0 +1,12 @@
+---
+- name: Check Memory Usage
+  hosts: "{{ target | default('all') }}"
+  gather_facts: true
+
+  tasks:
+    - name: Display memory usage
+      ansible.builtin.debug:
+        msg: |
+          Total Memory: {{ ansible_facts.memtotal_mb }} MB
+          Free Memory: {{ ansible_facts.memfree_mb }} MB
+          Used Memory: {{ ansible_facts.memused_mb | default(ansible_facts.memtotal_mb - ansible_facts.memfree_mb) }} MB

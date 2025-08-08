@@ -1,0 +1,28 @@
+---
+- name: Update Zabbix Agent on RHEL/Fedora hosts
+  hosts: "{{ target | default('all') }}"
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Stop zabbix-agent service
+      ansible.builtin.systemd:
+        name: zabbix-agent
+        state: stopped
+        enabled: true
+
+    - name: Update package cache
+      ansible.builtin.dnf:
+        update_cache: true
+
+    - name: Upgrade all packages (including zabbix-agent)
+      ansible.builtin.command:
+        cmd: dnf upgrade -y zabbix-agent
+      register: upgrade_result
+      changed_when: "'Upgraded:' in upgrade_result.stdout or upgrade_result.rc == 0"
+
+    - name: Start and enable zabbix-agent service
+      ansible.builtin.systemd:
+        name: zabbix-agent
+        state: started
+        enabled: true

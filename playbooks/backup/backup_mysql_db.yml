@@ -1,0 +1,39 @@
+---
+- name: Backup MySQL Database
+  hosts: "{{ target | default('all') }}"
+  become: true
+  gather_facts: false
+
+  vars:
+    mysql_user: root
+    mysql_password: your_mysql_password
+    mysql_host: localhost
+    mysql_database: your_database_name
+    backup_dir: /opt/homelab/backup/mysql
+    timestamp: "{{ lookup('ansible.builtin.pipe', 'date +%Y%m%d_%H%M%S') }}"
+    backup_file: "{{ backup_dir }}/mysql_backup_{{ mysql_database }}_{{ timestamp }}.sql"
+
+  tasks:
+    - name: Ensure backup directory exists
+      ansible.builtin.file:
+        path: "{{ backup_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Dump MySQL database
+      ansible.builtin.command:
+        cmd: >
+          mysqldump -u{{ mysql_user }} -p'{{ mysql_password }}' -h {{ mysql_host }} {{ mysql_database }}
+          > {{ backup_file }}
+      no_log: true
+      changed_when: true
+
+    - name: Verify backup file exists
+      ansible.builtin.stat:
+        path: "{{ backup_file }}"
+      register: backup_stat
+
+    - name: Fail if backup file not created
+      ansible.builtin.fail:
+        msg: "MySQL backup failed: {{ backup_file }} was not created."
+      when: not backup_stat.stat.exists

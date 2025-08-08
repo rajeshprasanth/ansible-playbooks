@@ -1,0 +1,24 @@
+---
+- name: Get and set timezone
+  hosts: "{{ target | default('all') }}"
+  become: true
+  gather_facts: false
+
+  vars:
+    desired_timezone: Asia/Kolkata
+
+  tasks:
+    - name: Get current timezone
+      ansible.builtin.command:
+        cmd: timedatectl show --property=Timezone --value
+      register: current_tz
+      changed_when: false
+      tags:
+        - get_timezone
+
+    - name: Set timezone if different
+      community.general.timezone:
+        name: "{{ desired_timezone }}"
+      when: current_tz.stdout != desired_timezone
+      tags:
+        - set_timezone

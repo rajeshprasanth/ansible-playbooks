@@ -1,0 +1,17 @@
+---
+- name: Deploy a single local file to remote directory
+  hosts: "{{ target | default('all') }}"
+  become: true
+
+  vars:
+    local_file: "./myfile.txt"          # local file path relative to playbook
+    remote_path: "/opt/remote_directory/myfile.txt"  # full remote file path
+
+  tasks:
+    - name: Copy single file to remote
+      ansible.builtin.copy:
+        src: "{{ local_file }}"
+        dest: "{{ remote_path }}"
+        owner: root
+        group: root
+        mode: '0644'

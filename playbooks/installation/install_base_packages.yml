@@ -1,0 +1,27 @@
+---
+- name: Install Fedora base packages
+  hosts: "{{ target | default('all') }}"
+  become: true
+  gather_facts: false
+
+  vars:
+    base_packages:
+      - vim
+      - git
+      - curl
+      - wget
+      - net-tools
+      - bash-completion
+      - man
+      - lsof
+      - unzip
+      - htop
+      - mailx
+      - tmux
+
+  tasks:
+    - name: Install base packages
+      ansible.builtin.dnf:
+        name: "{{ base_packages }}"
+        state: present
+        update_cache: true

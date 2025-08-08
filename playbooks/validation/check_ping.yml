@@ -1,0 +1,16 @@
+---
+- name: Ping selected target hosts
+  hosts: "{{ target | default('all') }}"
+  gather_facts: false
+  become: false
+
+  vars:
+    ping_msg: "Pinging {{ inventory_hostname }}..."
+
+  tasks:
+    - name: Show host being pinged
+      ansible.builtin.debug:
+        msg: "{{ ping_msg }}"
+
+    - name: Ping the target host
+      ansible.builtin.ping:

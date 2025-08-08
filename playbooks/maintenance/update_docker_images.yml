@@ -1,0 +1,37 @@
+---
+- name: Pull Docker images (all or specific)
+  hosts: "{{ target | default('all') }}"
+  become: true
+  gather_facts: false
+
+  vars:
+    target_image: ""  # Set to "" or leave undefined to pull all images used by containers
+
+  tasks:
+    - name: Get all Docker images used by existing containers (only if no target image specified)
+      ansible.builtin.shell: |
+        set -o pipefail
+        docker ps -aq | xargs -r docker inspect --format '{{ "{{.Config.Image}}" }}'
+      register: docker_images_raw
+      changed_when: false
+      failed_when: false
+      when: target_image == ""
+
+    - name: Extract unique Docker images
+      ansible.builtin.set_fact:
+        docker_images: >-
+          {{
+            (target_image != "")
+            | ternary([target_image], docker_images_raw.stdout_lines | unique)
+          }}
+
+    - name: Display Docker images that will be pulled
+      ansible.builtin.debug:
+        var: docker_images
+
+    - name: Pull Docker images
+      community.docker.docker_image:
+        name: "{{ item }}"
+        source: pull
+      loop: "{{ docker_images }}"
+      when: docker_images | length > 0

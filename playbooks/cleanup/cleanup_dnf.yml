@@ -1,0 +1,16 @@
+---
+- name: Cleanup DNF cache and metadata
+  hosts: "{{ target | default('all') }}"
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Clean all cached files
+      ansible.builtin.command:
+        cmd: dnf clean all
+      changed_when: false
+
+    - name: Remove unused packages and dependencies
+      ansible.builtin.command:
+        cmd: dnf autoremove -y
+      changed_when: true

@@ -29,7 +29,7 @@ ansible-playbooks/
 │   ├── maintenance/           # Playbooks for updating OS, Docker, Docker images, and Zabbix agent
 │   └── validation/            # Playbooks to check system health and status (CPU, memory, disk, uptime, ping, etc.)
 ├── README.md                  # Project overview and usage instructions
-└── requirements.yml           # External Ansible roles and collections dependencies
+└── requirements.yml           # External Ansible roles and collections dependencies 
 
 ```
 ---

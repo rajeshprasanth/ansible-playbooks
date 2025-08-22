@@ -1,0 +1,48 @@
+---
+- name: Setup homelab directory structure
+  hosts: "{{ target | default('all') }}"
+  become: true
+  gather_facts: false
+
+  vars:
+    homelab_base: /opt/homelab
+    homelab_dirs:
+      - "{{ homelab_base }}/apps/docker/"
+      - "{{ homelab_base }}/apps/native/"
+      - "{{ homelab_base }}/automation/ansible"
+      - "{{ homelab_base }}/automation/terraform"
+      - "{{ homelab_base }}/automation/opentofu"
+      - "{{ homelab_base }}/automation/scripts"
+      - "{{ homelab_base }}/automation/pipelines"
+      - "{{ homelab_base }}/backup/configs"
+      - "{{ homelab_base }}/backup/databases"
+      - "{{ homelab_base }}/backup/apps"
+      - "{{ homelab_base }}/backup/system"
+      - "{{ homelab_base }}/docs/architecture"
+      - "{{ homelab_base }}/docs/runbooks"
+      - "{{ homelab_base }}/docs/howtos"
+      - "{{ homelab_base }}/shares/nfs"
+      - "{{ homelab_base }}/shares/smb"
+      - "{{ homelab_base }}/logs/apps"
+      - "{{ homelab_base }}/logs/automation"
+      - "{{ homelab_base }}/logs/system"
+      - "{{ homelab_base }}/secrets/ssl-certs"
+      - "{{ homelab_base }}/secrets/ssh-keys"
+      - "{{ homelab_base }}/secrets/api-tokens"
+      - "{{ homelab_base }}/scratch"
+
+  tasks:
+    - name: Create homelab directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop: "{{ homelab_dirs }}"
+
+    - name: Restrict access to secrets directory
+      file:
+        path: "{{ homelab_base }}/secrets"
+        state: directory
+        mode: '0750'
+        owner: root
+        group: root

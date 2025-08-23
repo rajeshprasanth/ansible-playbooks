@@ -33,14 +33,14 @@
 
   tasks:
     - name: Create homelab directories
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
         mode: '0755'
       loop: "{{ homelab_dirs }}"
 
     - name: Restrict access to secrets directory
-      file:
+      ansible.builtin.file:
         path: "{{ homelab_base }}/secrets"
         state: directory
         mode: '0750'
